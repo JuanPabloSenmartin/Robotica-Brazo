@@ -4,6 +4,7 @@ import os
 import OCR
 import Linguist
 
+# python Main.py -t "/usr/bin/tesseract" -l spa -c 1920 1080
 
 def main():
     """
@@ -51,8 +52,8 @@ def main():
 
     args = parser.parse_args()
 
-    if args.show_langs:
-        Linguist.show_codes()
+    # if args.show_langs:
+    #     Linguist.show_codes()
 
     if args.show_views:
         print(OCR.views.__doc__)

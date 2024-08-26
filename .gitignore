@@ -1,3 +1,14 @@
-# Project exclude paths
+# Exclude the virtual environment
 /venv/
+/.venv/
+
+# Exclude Python cache files
+__pycache__/
+
+# Exclude PyCharm project files
+.idea/
+*.iml
+
+# Exclude other project-specific files
 OCR_for_files.py
+images/
