@@ -20,13 +20,12 @@ def show_points(x_coords_local, y_coords_local):
 # Load the image
 image = cv2.imread('/home/jorgesuarez/PycharmProjects/Robotica-Brazo/vector/formitas.png')
 
-image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+rotated_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+
+flipped_image = cv2.flip(rotated_image, 1)
 
 # Convert the image to grayscale
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-cv2.imshow("gray", gray)
-cv2.waitKey(0)
+gray = cv2.cvtColor(flipped_image, cv2.COLOR_BGR2GRAY)
 
 # Apply Gaussian blur to reduce noise
 blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -34,18 +33,14 @@ blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 # Apply edge detection (Canny) with different thresholds if necessary
 edges = cv2.Canny(blurred, 100, 200)
 
-cv2.imshow("edges", edges)
-cv2.waitKey(0)
-
 # Find contours in the edge-detected image
 contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-print(f'Number of contours: {len(contours)}')
 
 # Draw contours on the image
-cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
+cv2.drawContours(flipped_image, contours, -1, (0, 255, 0), 2)
 
-cv2.imshow("contours", image)
+cv2.imshow("contours", flipped_image)
 cv2.waitKey(0)
 
 # Define the frame limits (in centimeters)
@@ -57,7 +52,7 @@ frame_width_cm = frame_top_left[0] - frame_bottom_right[0]  # x difference
 frame_height_cm = frame_top_left[1] - frame_bottom_right[1]  # y difference
 
 # Get image dimensions (in pixels)
-image_height, image_width = image.shape[:2]
+image_height, image_width = flipped_image.shape[:2]
 
 # Initialize lists to hold all contours' reduced coordinates
 all_x_coords = []
@@ -85,7 +80,7 @@ for contour in contours:
         y_coords.append(y_m)
 
         # Draw the contour on the image (optional)
-        # cv2.circle(image, (x_pixel, y_pixel), 1, (0, 255, 0), -1)
+        # cv2.circle(flipped_image, (x_pixel, y_pixel), 1, (0, 255, 0), -1)
 
     # Apply reduced_coords to the current contour
     reduced_x, reduced_y, n_points = reduced_coords(x_coords, y_coords)
@@ -98,6 +93,6 @@ for contour in contours:
 print(f'Total number of points after reduction: {n}')
 
 # Display the image with detected curves
-cv2.imshow('Detected Curves', image)
+cv2.imshow('Detected Curves', flipped_image)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
