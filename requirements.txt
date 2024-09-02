@@ -1,5 +1,7 @@
 pytesseract~=0.3.7
 opencv-python
 numpy
-pyaudio
 SpeechRecognition
+matplotlib
+scipy
+pyaudio
