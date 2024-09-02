@@ -2,6 +2,8 @@ pytesseract~=0.3.7
 opencv-python
 numpy
 SpeechRecognition
+streamlit
+watchdog
 matplotlib
 scipy
 pyaudio
