@@ -5,8 +5,8 @@ import random
 import math
 
 
-def reduced_coords(x_coords, y_coords):
-    n_points = int(len(x_coords) * 0.25)
+def reduced_coords(x_coords, y_coords, factor):
+    n_points = int(len(x_coords) * factor)
     x_coords = numpy.array(x_coords)
     x_min = x_coords.min()
     x_max = x_coords.max()
@@ -51,3 +51,41 @@ def reduced_coords(x_coords, y_coords):
     # ax.set_aspect('equal')
     # plt.show()
     return new_x_points, new_y_points, n_points
+
+
+def approximate_coords(x_coords, y_coords, n=4, distance_threshold=0.005):
+    # Initialize new lists to store the averaged coordinates
+    new_x_coords = []
+    new_y_coords = []
+
+    i = 0
+    while i < len(x_coords) - 1:
+        # Calculate the distance between the current point and the next point
+        dist = math.sqrt((x_coords[i + 1] - x_coords[i]) ** 2 + (y_coords[i + 1] - y_coords[i]) ** 2)
+
+        # If the distance is below the threshold, average the points within the window of size n
+        if dist < distance_threshold:
+            x_window = x_coords[i:i + n]
+            y_window = y_coords[i:i + n]
+
+            avg_x = sum(x_window) / len(x_window)
+            avg_y = sum(y_window) / len(y_window)
+
+            new_x_coords.append(avg_x)
+            new_y_coords.append(avg_y)
+
+            i += n  # Skip the next n points
+        else:
+            # If the distance is above the threshold, just add the current point
+            new_x_coords.append(x_coords[i])
+            new_y_coords.append(y_coords[i])
+
+            i += 1  # Move to the next point
+
+    # Append the last point to make sure the contour closes correctly
+    new_x_coords.append(x_coords[-1])
+    new_y_coords.append(y_coords[-1])
+
+    # Return the new coordinates and the number of points
+    n_points = len(new_x_coords)
+    return new_x_coords, new_y_coords, n_points
