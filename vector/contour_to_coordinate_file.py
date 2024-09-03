@@ -1,10 +1,9 @@
-from asyncio import sleep
-
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from cobot.rodri import draw
-from vector.reduced_coords import reduced_coords
+from vector.reduced_coords import reduced_coords, approximate_coords
+import cv2.ximgproc as xipg
 
 
 def show_points(x_coords_local, y_coords_local):
@@ -21,7 +20,6 @@ def show_points(x_coords_local, y_coords_local):
 image = cv2.imread('/home/jorgesuarez/PycharmProjects/Robotica-Brazo/vector/formitas.png')
 
 rotated_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
-
 flipped_image = cv2.flip(rotated_image, 1)
 
 # Convert the image to grayscale
@@ -33,14 +31,23 @@ blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 # Apply edge detection (Canny) with different thresholds if necessary
 edges = cv2.Canny(blurred, 100, 200)
 
-# Find contours in the edge-detected image
-contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# Apply thinning to reduce lines to single-pixel width
+thinned_edges = xipg.thinning(edges)
 
+# Find contours using RETR_TREE to get both internal and external contours with hierarchy
+contours, hierarchy = cv2.findContours(thinned_edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-# Draw contours on the image
-cv2.drawContours(flipped_image, contours, -1, (0, 255, 0), 2)
+# Filter contours based on hierarchy to avoid duplicates (outer vs inner)
+filtered_contours = []
+for i, h in enumerate(hierarchy[0]):
+    # Use the hierarchy to select only the parent contours (outermost and meaningful shapes)
+    if h[3] == -1:  # Parent contour
+        filtered_contours.append(contours[i])
 
-cv2.imshow("contours", flipped_image)
+# Draw filtered contours on the image
+cv2.drawContours(flipped_image, filtered_contours, -1, (0, 255, 0), 2)
+
+cv2.imshow("Filtered Contours", flipped_image)
 cv2.waitKey(0)
 
 # Define the frame limits (in centimeters)
@@ -59,8 +66,8 @@ all_x_coords = []
 all_y_coords = []
 n = 0
 
-# Iterate over each contour
-for contour in contours:
+# Iterate over each filtered contour
+for contour in filtered_contours:
     x_coords = []
     y_coords = []
 
@@ -79,15 +86,17 @@ for contour in contours:
         x_coords.append(x_m)
         y_coords.append(y_m)
 
-        # Draw the contour on the image (optional)
-        # cv2.circle(flipped_image, (x_pixel, y_pixel), 1, (0, 255, 0), -1)
-
     # Apply reduced_coords to the current contour
-    reduced_x, reduced_y, n_points = reduced_coords(x_coords, y_coords)
+    reduced_x, reduced_y, n_points = reduced_coords(x_coords, y_coords, 0.1)
+    avg_coords_x, avg_coords_y, _ = approximate_coords(reduced_x, reduced_y, 2, 0.05)
     reduced_x.append(reduced_x[0])
     reduced_y.append(reduced_y[0])
+
+    show_points(x_coords, y_coords)
     show_points(reduced_x, reduced_y)
-    draw(reduced_x, reduced_y)
+    show_points(avg_coords_x, avg_coords_y)
+    # draw(reduced_x, reduced_y)
+
     n += n_points
 
 print(f'Total number of points after reduction: {n}')
