@@ -5,3 +5,5 @@ pyaudio
 SpeechRecognition
 streamlit
 watchdog
+flask
+flask-cors
