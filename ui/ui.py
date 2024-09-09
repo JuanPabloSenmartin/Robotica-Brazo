@@ -3,10 +3,16 @@ import cv2
 import streamlit as st
 import speech_recognition as sr
 
+st.title("Cobot Remote Control")
+col1, col2 = st.columns([5, 2])
+
+message_preview = ""
+audio_message_preview = ""
+
 
 def recognize_speech():
     recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
+    with sr.Microphone(chunk_size=720) as source:
         print("Say something!")
         # todo: test mic sensitivity
         audio = recognizer.listen(source)
@@ -29,22 +35,19 @@ def recognize_speech():
         }
 
 
-message_preview = ""
-audio_message_preview = ""
-
-st.title("Cobot Remote Control")
-
-col1, col2 = st.columns([5, 2])
-
 message_preview = col1.text_input("Enter input:", "")
 
-# Create a placeholder in the first column for the camera feed
+pic = col1.camera_input("Camera Input")
+if pic:
+    print("PIC", pic)
+
 camera_placeholder = col1.empty()
 recording_text_placeholder = col1.empty()
 
 st.session_state.recording = True
-recording_button_title = "Record"
-recording_button = col1.button(recording_button_title)
+ocr_button = col1.button("Get Text")
+picture_button = col1.button("Send Picture")
+recording_button = col1.button("Record")
 
 if recording_button:
     recording_text_placeholder.text("Recording...")
@@ -67,26 +70,3 @@ def get_not_empty_preview(message_preview, audio_message_preview):
 
 
 col2.write(get_not_empty_preview(message_preview, audio_message_preview))
-#
-# cap = cv2.VideoCapture(1)
-# stop_button_pressed = st.button("Stop")
-#
-# while cap.isOpened() and not stop_button_pressed:
-#     ret, frame = cap.read()
-#
-#     if not ret:
-#         st.write("The video capture has ended.")
-#         break
-#
-#     # Convert the frame from BGR to RGB format
-#     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#
-#     # Display the frame in the placeholder within the first column
-#     camera_placeholder.image(frame, channels="RGB")
-#
-#     # Break the loop if the 'q' key is pressed or the user clicks the "Stop" button
-#     if cv2.waitKey(1) & 0xFF == ord("q") or stop_button_pressed:
-#         break
-#
-# cap.release()
-# cv2.destroyAllWindows()
