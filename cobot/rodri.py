@@ -3,31 +3,50 @@ import socket
 import time
 import numpy as np
 
-#La siguiente función transforma de radianes a grados para poder insertar las coordenadas indicadas en el teach pendant directamente en las 
-#funciones de move
-def rads_to_degrees_string(degree_array: list[float]) -> str :
-    #rads_array = np.deg2rad(degree_array)
+
+# La siguiente función transforma de radianes a grados para poder insertar las coordenadas indicadas en el teach pendant directamente en las
+# funciones de move
+def rads_to_degrees_string(degree_array: list[float]) -> str:
+    # rads_array = np.deg2rad(degree_array)
     rads_array = degree_array
     rads_list = list(map(str, rads_array))
-    return f"[{', '.join(rads_list)}]"    
+    return f"[{', '.join(rads_list)}]"
 
-#Conexiones IP
-HOST = "192.168.0.16" # IP del robot
-PORT = 30001 # port: 30001, 30002 o 30003, en ambos extremos
-print("Conectando a IP: ", HOST)
-
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print("conectando...")
-s.connect((HOST, PORT))
-time.sleep(0.5)
 
 # Punto generico Y1
+def draw(x_coords, y_coords):
+    # Conexiones IP
+    HOST = "192.168.0.16"  # IP del robot
+    PORT = 30001  # port: 30001, 30002 o 30003, en ambos extremos
+    print("Conectando a IP: ", HOST)
 
-s.send("movel(p[0.5,0.2,0.248,2.5,-1.9,0], a=0.2, v=0.1, t=0, r=0)\n".encode('utf-8'))
-time.sleep(5)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print("conectando...")
+    s.connect((HOST, PORT))
+    time.sleep(0.5)
+    send_command(s, x_coords[0], y_coords[0], 0.1, 7)
+    time.sleep(10)
+    for i in range(0, len(x_coords) - 1):
+        x = x_coords[i]
+        y = y_coords[i]
+        z = 0.041
+        send_command(s, x, y, z, 1.5)
+        time.sleep(2)
+    send_command(s, x_coords[len(x_coords) - 1], y_coords[len(y_coords) - 1], 0.1, 7)
+    time.sleep(10)
+    s.close()
+
+
+def send_command(s, x, y, z, t=3):
+    command = f"movel(p[{x:.2f}, {y:.2f}, {z:.2f}, 2.5, -1.9, 0], a=0.05, v=0.05, t={t:.2f})\n"
+    s.send(command.encode('utf-8'))
+    print(f"Command sent: {command}")
+
+# s.send("movel(p[0.5,0.2,0.05,2.5,-1.9,0], a=0.2, v=0.1, t=0, r=0)\n".encode('utf-8'))
+# time.sleep(5)
 
 # # Letra Y
-#s.send (b"movej(" + rads_to_degrees_string([-8.64, -48.46, 13.09, 29.53, 75.28, -3.93]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
+# s.send (b"movej(" + rads_to_degrees_string([-8.64, -48.46, 13.09, 29.53, 75.28, -3.93]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
 # time.sleep(2)
 # s.send (b"movej(" + rads_to_degrees_string([-9.75, -48.83, 13.05, 25.97, 75.32, -3.95]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
 # time.sleep(2)
@@ -85,5 +104,3 @@ time.sleep(5)
 # # Punto generico F2
 # s.send (b"movej(" + rads_to_degrees_string([-19.52, -62.71, 41.96, 11.9, 68.95, 1.37]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
 # time.sleep(5)
-
-s.close()
