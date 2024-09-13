@@ -4,6 +4,8 @@ numpy
 SpeechRecognition
 streamlit
 watchdog
+flask
+flask-cors
 matplotlib
 scipy
 pyaudio
