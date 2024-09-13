@@ -1,8 +1,8 @@
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+
 from cobot.rodri import draw
-from vector.reduced_coords import reduced_coords, approximate_coords
+from reduced_coords import reduced_coords, approximate_coords
 import cv2.ximgproc as xipg
 
 
@@ -17,7 +17,7 @@ def show_points(x_coords_local, y_coords_local):
 
 
 # Load the image
-image = cv2.imread('/home/jorgesuarez/PycharmProjects/Robotica-Brazo/vector/formitas.png')
+image = cv2.imread('/Users/rick/faculty/robotica/Robotica-Brazo/vector/formitas.png')
 
 rotated_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
 flipped_image = cv2.flip(rotated_image, 1)
@@ -92,10 +92,10 @@ for contour in filtered_contours:
     reduced_x.append(reduced_x[0])
     reduced_y.append(reduced_y[0])
 
-    show_points(x_coords, y_coords)
-    show_points(reduced_x, reduced_y)
-    show_points(avg_coords_x, avg_coords_y)
-    # draw(reduced_x, reduced_y)
+    # show_points(x_coords, y_coords)
+    # show_points(reduced_x, reduced_y)
+    # show_points(avg_coords_x, avg_coords_y)
+    draw(reduced_x, reduced_y)
 
     n += n_points
 

@@ -16,8 +16,8 @@ def rads_to_degrees_string(degree_array: list[float]) -> str:
 # Punto generico Y1
 def draw(x_coords, y_coords):
     # Conexiones IP
-    HOST = "192.168.0.16"  # IP del robot
-    PORT = 30001  # port: 30001, 30002 o 30003, en ambos extremos
+    HOST = "192.168.0.18"  # IP del robot
+    PORT = 30002  # port: 30001, 30002 o 30003, en ambos extremos
     print("Conectando a IP: ", HOST)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,7 +29,8 @@ def draw(x_coords, y_coords):
     for i in range(0, len(x_coords) - 1):
         x = x_coords[i]
         y = y_coords[i]
-        z = 0.041
+        #z = 0.041
+        z = 0.07
         send_command(s, x, y, z, 1.5)
         time.sleep(2)
     send_command(s, x_coords[len(x_coords) - 1], y_coords[len(y_coords) - 1], 0.1, 7)
