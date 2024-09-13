@@ -71,7 +71,7 @@ if __name__ == '__main__':
     # tess_path =  r"C:\Program Files\Tesseract-OCR\tesseract.exe"  # Windows example
     # tess_path = '/usr/local/Cellar/tesseract/4.1.1/bin/tesseract'  # MAC example
     # view_mode = 1
-    # source = 0
-    # crop = [100, 100]
+    # source = '/opt/homebrew/bin/tesseract'
+    # crop = [1080, 1920]
     # language = "en"
     # OCR.ocr_stream(view_mode=view_mode, source=source, crop=crop, language=language)
