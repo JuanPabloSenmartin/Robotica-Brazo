@@ -53,7 +53,7 @@ def reduced_coords(x_coords, y_coords, factor):
     return new_x_points, new_y_points, n_points
 
 
-def approximate_coords(x_coords, y_coords, n=4, distance_threshold=0.005):
+def approximate_coords(x_coords, y_coords, n=4, distance_threshold=0.01):
     # Initialize new lists to store the averaged coordinates
     new_x_coords = []
     new_y_coords = []

@@ -1,107 +1,88 @@
-# Test
 import socket
 import time
 import numpy as np
 
+# Velocidad fija predeterminada (en unidades por segundo)
+FIXED_VELOCITY = 0.04  # Ajusta esta velocidad según sea necesario
+# Aceleración arbitraria (en unidades por segundo cuadrado)
+ARBITRARY_ACCELERATION = 0.025  # Ajusta esta aceleración según sea necesario
 
-# La siguiente función transforma de radianes a grados para poder insertar las coordenadas indicadas en el teach pendant directamente en las
-# funciones de move
-def rads_to_degrees_string(degree_array: list[float]) -> str:
-    # rads_array = np.deg2rad(degree_array)
-    rads_array = degree_array
-    rads_list = list(map(str, rads_array))
-    return f"[{', '.join(rads_list)}]"
+# z = 0.075
+z = 0.062
+
+
+# Calcula la distancia entre dos puntos
+def calculate_distance(x1, y1, x2, y2):
+    return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+
+# Calcula el tiempo necesario para moverse entre dos puntos dado una velocidad fija
+def calculate_time(distance, velocity):
+    return distance / velocity
 
 
 # Punto generico Y1
 def draw(x_coords, y_coords):
+    s = init()
+    send_command(s, x_coords[0], y_coords[0], 0.1, 3)
+    time.sleep(3)
+
+    for i in range(0, len(x_coords)):
+        if i < len(x_coords) - 1:
+            x1 = x_coords[i]
+            y1 = y_coords[i]
+            x2 = x_coords[i + 1]
+            y2 = y_coords[i + 1]
+            distance = calculate_distance(x1, y1, x2, y2)
+            time_to_travel = calculate_time(distance, FIXED_VELOCITY)
+            time_to_travel = time_to_travel if time_to_travel > 0.6 else 0.6
+        else:
+            x1 = x_coords[i]
+            y1 = y_coords[i]
+            time_to_travel = 0.6
+
+        send_command(s, x1, y1, z, time_to_travel)
+        time.sleep(time_to_travel)
+
+    send_command(s, x_coords[len(x_coords) - 1], y_coords[len(y_coords) - 1], 0.1, 3)
+    time.sleep(3)
+    s.close()
+
+
+def init():
     # Conexiones IP
     HOST = "192.168.0.18"  # IP del robot
-    PORT = 30002  # port: 30001, 30002 o 30003, en ambos extremos
+    PORT = 30001  # port: 30001, 30002 o 30003, en ambos extremos
     print("Conectando a IP: ", HOST)
-
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print("conectando...")
     s.connect((HOST, PORT))
     time.sleep(0.5)
-    send_command(s, x_coords[0], y_coords[0], 0.1, 7)
-    time.sleep(10)
+    return s
+
+
+def draw_x_y_z(x_coords, y_coords, z_coords):
+    s = init()
     for i in range(0, len(x_coords) - 1):
-        x = x_coords[i]
-        y = y_coords[i]
-        #z = 0.041
-        z = 0.07
-        send_command(s, x, y, z, 1.5)
-        time.sleep(2)
-    send_command(s, x_coords[len(x_coords) - 1], y_coords[len(y_coords) - 1], 0.1, 7)
-    time.sleep(10)
-    s.close()
+        x1 = x_coords[i]
+        y1 = y_coords[i]
+        y2 = y_coords[i + 1]
+        x2 = x_coords[i + 1]
+        z_local = z_coords[i]
+        #
+        # distance = calculate_distance(x1, y1, x2, y2)
+        # time_to_travel = calculate_time(distance, FIXED_VELOCITY)
+        # time_to_travel = time_to_travel if time_to_travel > 0.6 else 0.6
+        send_command(s, x1, y1, z_local, 5)
+        time.sleep(5)
 
 
-def send_command(s, x, y, z, t=3):
-    command = f"movel(p[{x:.2f}, {y:.2f}, {z:.2f}, 2.5, -1.9, 0], a=0.05, v=0.05, t={t:.2f})\n"
+def send_command(s, x, y, z, t=None):
+    if t is None:
+        # Enviar comando con velocidad fija y aceleración arbitraria
+        command = f"movel(p[{x:.2f}, {y:.2f}, {z:.2f}, 2.5, -1.9, 0], a={ARBITRARY_ACCELERATION:.2f}, v={FIXED_VELOCITY:.2f})\n"
+    else:
+        # Enviar comando con velocidad fija y aceleración arbitraria
+        command = f"movel(p[{x:.2f}, {y:.2f}, {z:.2f}, 2.5, -1.9, 0], a={ARBITRARY_ACCELERATION:.2f}, v={FIXED_VELOCITY:.2f}, t={t:.2f})\n"
     s.send(command.encode('utf-8'))
     print(f"Command sent: {command}")
-
-# s.send("movel(p[0.5,0.2,0.05,2.5,-1.9,0], a=0.2, v=0.1, t=0, r=0)\n".encode('utf-8'))
-# time.sleep(5)
-
-# # Letra Y
-# s.send (b"movej(" + rads_to_degrees_string([-8.64, -48.46, 13.09, 29.53, 75.28, -3.93]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-9.75, -48.83, 13.05, 25.97, 75.32, -3.95]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-8.64, -48.46, 13.09, 29.53, 75.28, -3.93]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-9.71, -48.49, 13.04, 24.18, 68.15, -3.95]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-8.64, -48.46, 13.09, 29.53, 75.28, -3.93]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-10.5, -47.68, 13.14, 31.97, 70.54, -4.93]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-
-# # Punto generico Y2
-# s.send (b"movej(" + rads_to_degrees_string([-4.30, -57.68, 34.27, 16.29, 88.02, 1.38]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(5)
-
-# # Punto generico P1
-# s.send (b"movej(" + rads_to_degrees_string([-12.35, -63.19, 45.51, 8.92, 72.91, -3.18]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(5)
-
-# # Letra P
-# s.send (b"movej(" + rads_to_degrees_string([-12.39, -59.80, 45.51, -0.95, 70.74, -3.18]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-12.38, -59.53, 44.60, -8.67, 71.32, 0.39]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-13.19, -59.48, 44.62, -8.27, 76.08, 0.38]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-13.18, -59.48, 44.66, -4.50, 76.10, 0.38]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-10.72, -59.48, 44.65, -4.51, 76.07, 0.38]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-
-# # Punto generico P1
-# s.send (b"movej(" + rads_to_degrees_string([-11.77, -63.11, 42.62, 10.14, 75.47, -3.18]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(5)
-
-# # Punto generico F1
-# s.send (b"movej(" + rads_to_degrees_string([-15.84, -62.38, 42.55, 13.67, 73.35, -7.90]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(5)
-
-# # Letra F
-# s.send (b"movej(" + rads_to_degrees_string([-15.53, -59.11, 42.55, 3.62, 71.72, 1.14]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-15.82, -59.06, 41.96, -4.13, 71.12, 1.36]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-18.04, -58.85, 41.95, -4.69, 70.97, 1.36]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-15.82, -59.06, 41.96, -4.13, 71.12, 1.36]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-16.57, -58.85, 41.97, -0.93, 68.96, 1.36]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-# s.send (b"movej(" + rads_to_degrees_string([-18.52, -58.85, 41.97, -0.94, 69.00, 1.36]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(2)
-
-# # Punto generico F2
-# s.send (b"movej(" + rads_to_degrees_string([-19.52, -62.71, 41.96, 11.9, 68.95, 1.37]).encode('utf-8') + ", a=0.5, v=0.25)\n".encode('utf-8'))
-# time.sleep(5)

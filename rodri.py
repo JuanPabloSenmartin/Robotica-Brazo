@@ -3,6 +3,9 @@ import socket
 import time
 import numpy as np
 
+# ESTE NO LO USAMOS, EL QUE USAMOS ESTA EN cobot/rodri.py
+
+
 #La siguiente función transforma de radianes a grados para poder insertar las coordenadas indicadas en el teach pendant directamente en las
 #funciones de move
 def rads_to_degrees_string(degree_array: list[float]) -> str :
