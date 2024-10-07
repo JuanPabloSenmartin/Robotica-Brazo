@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 
 from vector.image_drawer import ImageDrawer
+from text.text_drawer import TextDrawer
 
 app = Flask(__name__)
 CORS(app)
@@ -24,6 +25,7 @@ def draw_traces():
 def draw_text():
     text = request.json['text']
     print("TEXT", text)
+    TextDrawer.draw_text(text)
     return "Drawing text..."
 
 if __name__ == '__main__':
