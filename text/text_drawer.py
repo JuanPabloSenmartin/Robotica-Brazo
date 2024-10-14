@@ -22,7 +22,7 @@ class TextDrawer:
 
         inital_pos = (0.7, 0.3, z_high)
         send_command(s, inital_pos[0], inital_pos[1], z_high)
-        time.sleep(1)
+        time.sleep(3)
         current_pos = (0.7, 0.3, z_high)
         row = 1
         column = 1
@@ -57,7 +57,6 @@ class TextDrawer:
                 current_pos = (inital_pos[0] + points[0][0], inital_pos[1] + points[0][1])
                 if value == 1:
                     if  i == 0 or (i > 0 and (arr[i - 1] == 0)):
-                        print('sube')
                         send_command(s, current_pos[0], current_pos[1], z_high)
                         # position = draw(s, position, current_pos[0], current_pos[1], z_high)
                         time.sleep(2)
@@ -75,6 +74,10 @@ class TextDrawer:
                     # position = draw(s, position, inital_pos[0] + points[1][0], inital_pos[1] + points[1][1], z_low)
                     time.sleep(1)
                     if i + 1 < len(arr) and (arr[i + 1] == 0):
+                        send_command(s, inital_pos[0] + points[1][0], inital_pos[1] + points[1][1], z_high)
+                        # position = draw(s, position, inital_pos[0] + points[1][0], inital_pos[1] + points[1][1], z_high)
+                        time.sleep(1)
+                    if i == len(arr) - 1:
                         send_command(s, inital_pos[0] + points[1][0], inital_pos[1] + points[1][1], z_high)
                         # position = draw(s, position, inital_pos[0] + points[1][0], inital_pos[1] + points[1][1], z_high)
                         time.sleep(1)
